@@ -5,7 +5,7 @@ import (
 
 	"huibitica/internal/config"
 	"huibitica/internal/logger"
-	"huibitica/storage/postgresql"
+	"huibitica/internal/postgresql"
 
 	"github.com/rs/zerolog/log"
 )

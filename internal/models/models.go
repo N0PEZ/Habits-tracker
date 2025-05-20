@@ -4,18 +4,31 @@ import (
 	"time"
 )
 
+type RegisterUser struct {
+	Username string `json:"username" db:"username"`
+	Email    string `json:"email" db:"email"`
+	Phone    string `json:"phone,omitempty" db:"phone"`
+	Password string `json:"password" db:"password"`
+}
+
 type User struct {
-	ID        string    `json:"id" db:"user_id"`
+	UserID    int       `json:"id" db:"user_id"`
 	Username  string    `json:"username" db:"username"`
 	Email     string    `json:"email" db:"email"`
 	Phone     string    `json:"phone,omitempty" db:"phone"`
-	Password  string    `json:"-" db:"password"` // - означает исключение из JSON
 	CreatedAt time.Time `json:"created_at" db:"created_at"`
+}
+
+type Password struct {
+	ID       int    `json:"id" db:"id"`
+	UserID   int    `json:"user_id" db:"user_id"`
+	Username string `json:"username" db:"username"`
+	Password string `json:"password" db:"password"`
 }
 
 type Habit struct {
 	ID              int    `json:"id" db:"id"`
-	UserID          string `json:"user_id" db:"user_id"`
+	UserID          int    `json:"user_id" db:"user_id"`
 	Text            string `json:"text" db:"text"`
 	Note            string `json:"note,omitempty" db:"note"`
 	Good            bool   `json:"good" db:"good"`
@@ -28,7 +41,7 @@ type Habit struct {
 
 type Daily struct {
 	ID           int       `json:"id" db:"id"`
-	UserID       string    `json:"user_id" db:"user_id"`
+	UserID       int       `json:"user_id" db:"user_id"`
 	Text         string    `json:"text" db:"text"`
 	Note         string    `json:"note,omitempty" db:"note"`
 	Difficulty   int       `json:"difficulty" db:"difficulty"`
@@ -41,17 +54,10 @@ type Daily struct {
 
 type Task struct {
 	ID         int       `json:"id" db:"id"`
-	UserID     string    `json:"user_id" db:"user_id"`
+	UserID     int       `json:"user_id" db:"user_id"`
 	Name       string    `json:"name" db:"name"`
 	Note       string    `json:"note,omitempty" db:"note"`
 	Difficulty int       `json:"difficulty" db:"difficulty"`
 	Deadline   time.Time `json:"deadline" db:"deadline"`
 	Completed  bool      `json:"completed" db:"completed"`
-}
-
-type Password struct {
-	ID       int    `json:"id" db:"id"`
-	UserID   string `json:"user_id" db:"user_id"`
-	Username string `json:"username" db:"username"`
-	Password string `json:"password" db:"password"`
 }
