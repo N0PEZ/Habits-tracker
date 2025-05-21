@@ -2,31 +2,56 @@ package postgresql
 
 import (
 	"context"
+	"errors"
 	"fmt"
-	"log"
 
 	"github.com/jackc/pgx/v5"
+	"github.com/jackc/pgx/v5/pgconn"
+	"github.com/jackc/pgx/v5/pgxpool"
 )
 
-func InitDB(connString string) (*pgx.Conn, error) {
-	conn, err := pgx.Connect(context.Background(), connString)
+func InitDB(dbAddress string, dbName string) (*pgxpool.Pool, error) {
+	tempConn, err := pgx.Connect(context.Background(), dbAddress)
 	if err != nil {
 		return nil, fmt.Errorf("unable to connect to database: %v", err)
 	}
 
-	err = conn.Ping(context.Background())
+	err = tempConn.Ping(context.Background())
 	if err != nil {
 		return nil, fmt.Errorf("unable to ping database: %v", err)
+	}
+
+	_, err = tempConn.Exec(context.Background(), fmt.Sprintf("CREATE DATABASE %s OWNER postgres", dbName))
+	if err != nil {
+		var pgErr *pgconn.PgError
+		if errors.As(err, &pgErr) {
+			if !(pgErr.Code == "42P04") {
+				return nil, fmt.Errorf("ошибка создания БД: %v", err)
+			}
+		} else {
+			return nil, fmt.Errorf("ошибка создания БД: %v", err)
+		}
+	}
+	tempConn.Close(context.Background())
+
+	pool, err := pgxpool.New(context.Background(), dbAddress+"/"+dbName)
+	if err != nil {
+		return nil, fmt.Errorf("unable to connect to %s database: %v", dbName, err)
+	}
+
+	err = pool.Ping(context.Background())
+	if err != nil {
+		return nil, fmt.Errorf("unable to ping %s database: %v", dbName, err)
 	}
 
 	// Сначала создаем таблицу users, так как другие таблицы ссылаются на нее
 	queries := map[string]string{
 		"users": `CREATE TABLE IF NOT EXISTS users (
-			user_id SERIAL RIMARY KEY,
+			user_id SERIAL PRIMARY KEY,
 			username VARCHAR(255) UNIQUE NOT NULL,
 			email VARCHAR(255) UNIQUE NOT NULL,
 			phone VARCHAR(20),
-			created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+			created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 			)`,
 
 		"passwords": `CREATE TABLE IF NOT EXISTS passwords (
@@ -83,16 +108,14 @@ func InitDB(connString string) (*pgx.Conn, error) {
 				ON DELETE CASCADE)`,
 	}
 
-	// Создаем таблицы в правильном порядке
-	creationOrder := []string{"users", "passwords", "habits", "dailies", "tasks"}
+	creationOrder := [5]string{"users", "passwords", "habits", "dailies", "tasks"}
 	for _, table := range creationOrder {
 		query := queries[table]
-		_, err = conn.Exec(context.Background(), query)
+		_, err = pool.Exec(context.Background(), query)
 		if err != nil {
 			return nil, fmt.Errorf("unable to create table %s: %v", table, err)
 		}
 	}
 
-	log.Println("Database initialized successfully with foreign key constraints")
-	return conn, nil
+	return pool, nil
 }
