@@ -7,11 +7,11 @@ import (
 	"huibitica/internal/models"
 	"time"
 
-	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgconn"
+	"github.com/jackc/pgx/v5/pgxpool"
 )
 
-func RegisterUser(user models.RegisterUser, conn *pgx.Conn) error {
+func RegisterUser(user models.RegisterUser, conn *pgxpool.Pool) error {
 	tx, err := conn.Begin(context.Background()) // Начинаем транзакцию
 	if err != nil {
 		return fmt.Errorf("failed to begin transaction: %w", err)
@@ -64,7 +64,7 @@ func RegisterUser(user models.RegisterUser, conn *pgx.Conn) error {
 	return nil
 }
 
-func AddHabit(habit models.Habit, conn *pgx.Conn) error {
+func AddHabit(habit models.Habit, conn *pgxpool.Pool) error {
 	_, err := conn.Exec(context.Background(),
 		`INSERT INTO habits (
 			user_id, text, note, good, bad, difficulty,
@@ -86,7 +86,7 @@ func AddHabit(habit models.Habit, conn *pgx.Conn) error {
 	return nil
 }
 
-func AddDaily(daily models.Daily, conn *pgx.Conn) error {
+func AddDaily(daily models.Daily, conn *pgxpool.Pool) error {
 	_, err := conn.Exec(context.Background(),
 		`INSERT INTO dailies (
 			user_id, text, note, difficulty, start_date,
@@ -108,7 +108,7 @@ func AddDaily(daily models.Daily, conn *pgx.Conn) error {
 	return nil
 }
 
-func AddTask(task models.Task, conn *pgx.Conn) error {
+func AddTask(task models.Task, conn *pgxpool.Pool) error {
 	_, err := conn.Exec(context.Background(),
 		`INSERT INTO tasks (
 			user_id, name, note, difficulty, deadline)
@@ -125,7 +125,7 @@ func AddTask(task models.Task, conn *pgx.Conn) error {
 	return nil
 }
 
-func editUserUsername(userID, newUsername string, conn *pgx.Conn) error {
+func editUserUsername(userID, newUsername string, conn *pgxpool.Pool) error {
 	tx, err := conn.Begin(context.Background())
 	if err != nil {
 		return fmt.Errorf("failed to begin transaction: %w", err)
@@ -166,7 +166,7 @@ func editUserUsername(userID, newUsername string, conn *pgx.Conn) error {
 	return nil
 }
 
-func editUserEmail(userID, newEmail string, conn *pgx.Conn) error {
+func editUserEmail(userID, newEmail string, conn *pgxpool.Pool) error {
 	_, err := conn.Exec(context.Background(),
 		`UPDATE users
 		SET email = $1
@@ -186,7 +186,7 @@ func editUserEmail(userID, newEmail string, conn *pgx.Conn) error {
 	return nil
 }
 
-func editUserPhone(userID, newPhone string, conn *pgx.Conn) error {
+func editUserPhone(userID, newPhone string, conn *pgxpool.Pool) error {
 	_, err := conn.Exec(context.Background(),
 		`UPDATE users
 		SET phone = $1
@@ -200,7 +200,7 @@ func editUserPhone(userID, newPhone string, conn *pgx.Conn) error {
 	return nil
 }
 
-func editPassword(password models.Password, conn *pgx.Conn) error {
+func editPassword(password models.Password, conn *pgxpool.Pool) error {
 	_, err := conn.Exec(context.Background(),
 		`UPDATE passwords
 		SET password = $1,
@@ -213,7 +213,7 @@ func editPassword(password models.Password, conn *pgx.Conn) error {
 	}
 	return nil
 }
-func editHabit(habit models.Habit, conn *pgx.Conn) error {
+func editHabit(habit models.Habit, conn *pgxpool.Pool) error {
 	_, err := conn.Exec(context.Background(),
 		`UPDATE habits
 		SET text = $1, note = $2, good = $3, bad = $4,
@@ -236,7 +236,7 @@ func editHabit(habit models.Habit, conn *pgx.Conn) error {
 	return nil
 }
 
-func editDaily(daily models.Daily, conn *pgx.Conn) error {
+func editDaily(daily models.Daily, conn *pgxpool.Pool) error {
 	_, err := conn.Exec(context.Background(),
 		`UPDATE dailies
 		SET text = $1, note = $2, difficulty = $3,
@@ -260,7 +260,7 @@ func editDaily(daily models.Daily, conn *pgx.Conn) error {
 	return nil
 }
 
-func editTask(task models.Task, conn *pgx.Conn) error {
+func editTask(task models.Task, conn *pgxpool.Pool) error {
 	_, err := conn.Exec(context.Background(),
 		`UPDATE tasks
 		SET name = $1, note = $2, difficulty = $3,
@@ -279,7 +279,7 @@ func editTask(task models.Task, conn *pgx.Conn) error {
 	return nil
 }
 
-func deleteUser(userID int, conn *pgx.Conn) error {
+func deleteUser(userID int, conn *pgxpool.Pool) error {
 	_, err := conn.Exec(context.Background(),
 		`DELETE FROM users
 		WHERE user_id = $1`,
@@ -291,7 +291,7 @@ func deleteUser(userID int, conn *pgx.Conn) error {
 	return nil
 }
 
-func deleteHabit(id int, conn *pgx.Conn) error {
+func deleteHabit(id int, conn *pgxpool.Pool) error {
 	_, err := conn.Exec(context.Background(),
 		`DELETE FROM habits
 		WHERE id = $1`,
@@ -303,7 +303,7 @@ func deleteHabit(id int, conn *pgx.Conn) error {
 	return nil
 }
 
-func deleteDaily(id int, conn *pgx.Conn) error {
+func deleteDaily(id int, conn *pgxpool.Pool) error {
 	_, err := conn.Exec(context.Background(),
 		`DELETE FROM dailies
 		WHERE id = $1`,
@@ -315,7 +315,7 @@ func deleteDaily(id int, conn *pgx.Conn) error {
 	return nil
 }
 
-func deleteTask(id int, conn *pgx.Conn) error {
+func deleteTask(id int, conn *pgxpool.Pool) error {
 	_, err := conn.Exec(context.Background(),
 		`DELETE FROM tasks
 		WHERE id = $1`,
@@ -327,7 +327,7 @@ func deleteTask(id int, conn *pgx.Conn) error {
 	return nil
 }
 
-func getUserByID(userID int, conn *pgx.Conn) (*models.User, error) {
+func getUserByID(userID int, conn *pgxpool.Pool) (*models.User, error) {
 	var user models.User
 	err := conn.QueryRow(context.Background(),
 		`SELECT user_id, username, 
@@ -353,7 +353,7 @@ func getUserByID(userID int, conn *pgx.Conn) (*models.User, error) {
 	}, nil
 }
 
-func getUserByUsername(username string, conn *pgx.Conn) (*models.User, error) {
+func getUserByUsername(username string, conn *pgxpool.Pool) (*models.User, error) {
 	var user models.User
 	err := conn.QueryRow(context.Background(),
 		`SELECT user_id, username, email, phone, created_at
@@ -380,7 +380,7 @@ func getUserByUsername(username string, conn *pgx.Conn) (*models.User, error) {
 	}, nil
 }
 
-func getUserByEmail(email string, conn *pgx.Conn) (*models.User, error) {
+func getUserByEmail(email string, conn *pgxpool.Pool) (*models.User, error) {
 	var user models.User
 	err := conn.QueryRow(context.Background(),
 		`SELECT user_id, username, email, phone, created_at
@@ -407,7 +407,7 @@ func getUserByEmail(email string, conn *pgx.Conn) (*models.User, error) {
 	}, nil
 }
 
-func getHabits(userID int, conn *pgx.Conn) ([]models.Habit, error) {
+func getHabits(userID int, conn *pgxpool.Pool) ([]models.Habit, error) {
 	var habits []models.Habit
 	rows, err := conn.Query(context.Background(),
 		`SELECT id, user_id, text, note, good, bad,
@@ -448,7 +448,7 @@ func getHabits(userID int, conn *pgx.Conn) ([]models.Habit, error) {
 	return habits, nil
 }
 
-func getDailies(userID int, conn *pgx.Conn) ([]models.Daily, error) {
+func getDailies(userID int, conn *pgxpool.Pool) ([]models.Daily, error) {
 	var dailies []models.Daily
 	rows, err := conn.Query(context.Background(),
 		`SELECT id, user_id, text, note, difficulty,
@@ -490,7 +490,7 @@ func getDailies(userID int, conn *pgx.Conn) ([]models.Daily, error) {
 	return dailies, nil
 }
 
-func getTasks(userID int, conn *pgx.Conn) ([]models.Task, error) {
+func getTasks(userID int, conn *pgxpool.Pool) ([]models.Task, error) {
 	var tasks []models.Task
 	rows, err := conn.Query(context.Background(),
 		`SELECT id, user_id, name, note, difficulty,
