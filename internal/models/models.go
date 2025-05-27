@@ -4,11 +4,16 @@ import (
 	"time"
 )
 
-type RegisterUser struct {
+type RegisterUserRequest struct {
 	Username string `json:"username" db:"username"`
 	Email    string `json:"email" db:"email"`
 	Phone    string `json:"phone,omitempty" db:"phone"`
 	Password string `json:"password" db:"password"`
+}
+
+type EditUserData struct {
+	UserID    int    `json:"user_id" db:"user_id"`
+	NewString string `json:"new_string" db:"new_string"`
 }
 
 type User struct {
@@ -20,7 +25,6 @@ type User struct {
 }
 
 type Password struct {
-	ID       int    `json:"id" db:"id"`
 	UserID   int    `json:"user_id" db:"user_id"`
 	Username string `json:"username" db:"username"`
 	Password string `json:"password" db:"password"`
@@ -59,5 +63,4 @@ type Task struct {
 	Note       string    `json:"note,omitempty" db:"note"`
 	Difficulty int       `json:"difficulty" db:"difficulty"`
 	Deadline   time.Time `json:"deadline" db:"deadline"`
-	Completed  bool      `json:"completed" db:"completed"`
 }

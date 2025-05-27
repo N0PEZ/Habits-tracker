@@ -70,7 +70,7 @@ func InitDB(dbAddress string, dbName string) (*pgxpool.Pool, error) {
 			note VARCHAR(255),
 			good BOOLEAN DEFAULT TRUE NOT NULL,
 			bad BOOLEAN DEFAULT FALSE NOT NULL,
-			difficulty INT NOT NULL,
+			difficulty INT NOT NULL CHECK (difficulty BETWEEN 1 AND 5),
 			count_reset_after INT DEFAULT 0 NOT NULL,
 			good_count INT DEFAULT 0 NOT NULL,
 			bad_count INT DEFAULT 0 NOT NULL,
@@ -84,11 +84,11 @@ func InitDB(dbAddress string, dbName string) (*pgxpool.Pool, error) {
 			user_id INTEGER NOT NULL,
 			text VARCHAR(63) NOT NULL,
 			note VARCHAR(255),
-			difficulty INT NOT NULL,
+			difficulty INT NOT NULL CHECK (difficulty BETWEEN 1 AND 5),
 			start_date DATE NOT NULL,
 			repeat_every INT DEFAULT 0 NOT NULL,
 			repeat_every_x INT NOT NULL,
-			dayweeks VARCHAR(14) DEFAULT NULL,
+			dayweeks VARCHAR(32) DEFAULT NULL,
 			streak INT DEFAULT 0 NOT NULL,
 			CONSTRAINT fk_dailies_user 
 				FOREIGN KEY(user_id) 
@@ -100,7 +100,7 @@ func InitDB(dbAddress string, dbName string) (*pgxpool.Pool, error) {
 			user_id INTEGER NOT NULL,
 			name VARCHAR(63) NOT NULL,
 			note VARCHAR(255),
-			difficulty INT NOT NULL,
+			difficulty INT NOT NULL CHECK (difficulty BETWEEN 1 AND 5),
 			deadline DATE NOT NULL,
 			CONSTRAINT fk_tasks_user 
 				FOREIGN KEY(user_id) 
