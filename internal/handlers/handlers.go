@@ -198,7 +198,7 @@ func (h *Handler) NewTask(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func (h *Handler) GetUser(w http.ResponseWriter, r *http.Request) {
+func (h *Handler) GetUserByID(w http.ResponseWriter, r *http.Request) {
 	requestID := middleware.GetReqID(r.Context())
 
 	var req struct {
@@ -214,6 +214,66 @@ func (h *Handler) GetUser(w http.ResponseWriter, r *http.Request) {
 	h.log.Info().Str("request_id", requestID).Int("user_id", userID).Msg("Fetching user data")
 
 	user, err := postgresql.GetUserByID(userID, h.db)
+	if err != nil {
+		h.log.Error().Str("request_id", requestID).Err(err).Msg("Failed to fetch user data")
+		http.Error(w, "Failed to fetch user data", http.StatusInternalServerError)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	if err := json.NewEncoder(w).Encode(user); err != nil {
+		h.log.Error().Str("request_id", requestID).Err(err).Msg("Failed to encode response")
+		http.Error(w, "Failed to encode response", http.StatusInternalServerError)
+	}
+}
+
+func (h *Handler) GetUserByUsername(w http.ResponseWriter, r *http.Request) {
+	requestID := middleware.GetReqID(r.Context())
+
+	var req struct {
+		Username string `json:"username"`
+	}
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		h.log.Error().Str("request_id", requestID).Err(err).Msg("Invalid request body")
+		http.Error(w, "Invalid request body", http.StatusBadRequest)
+		return
+	}
+	username := req.Username
+
+	h.log.Info().Str("request_id", requestID).Str("username", username).Msg("Fetching user data")
+
+	user, err := postgresql.GetUserByUsername(username, h.db)
+	if err != nil {
+		h.log.Error().Str("request_id", requestID).Err(err).Msg("Failed to fetch user data")
+		http.Error(w, "Failed to fetch user data", http.StatusInternalServerError)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	if err := json.NewEncoder(w).Encode(user); err != nil {
+		h.log.Error().Str("request_id", requestID).Err(err).Msg("Failed to encode response")
+		http.Error(w, "Failed to encode response", http.StatusInternalServerError)
+	}
+}
+
+func (h *Handler) GetUserByEmail(w http.ResponseWriter, r *http.Request) {
+	requestID := middleware.GetReqID(r.Context())
+
+	var req struct {
+		Email string `json:"email"`
+	}
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		h.log.Error().Str("request_id", requestID).Err(err).Msg("Invalid request body")
+		http.Error(w, "Invalid request body", http.StatusBadRequest)
+		return
+	}
+	email := req.Email
+
+	h.log.Info().Str("request_id", requestID).Str("email", email).Msg("Fetching user data")
+
+	user, err := postgresql.GetUserByEmail(email, h.db)
 	if err != nil {
 		h.log.Error().Str("request_id", requestID).Err(err).Msg("Failed to fetch user data")
 		http.Error(w, "Failed to fetch user data", http.StatusInternalServerError)
