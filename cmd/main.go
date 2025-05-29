@@ -40,8 +40,8 @@ func main() {
 	r.Post("/api/tasks", handler.NewTask)
 
 	r.Get("/api/users/id", handler.GetUserByID)
-	r.Get("/api/users/username", handler.GetUserByID)
-	r.Get("/api/users/email", handler.GetUserByID)
+	r.Get("/api/users/username", handler.GetUserByUsername)
+	r.Get("/api/users/email", handler.GetUserByEmail)
 	r.Get("/api/habits", handler.GetHabits)
 	r.Get("/api/dailies", handler.GetDailies)
 	r.Get("/api/tasks", handler.GetTasks)
